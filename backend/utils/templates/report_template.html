@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #fff;
+    color: #1a1a2e;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .header {
+    background: #0F2744;
+    padding: 32px 40px 28px;
+    color: #fff;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .brand-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #378ADD;
+    display: inline-block;
+  }
+  .brand-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #7BA4C8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .report-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .report-meta {
+    font-size: 14px;
+    color: #7BA4C8;
+  }
+
+  .score-block { text-align: center; }
+  .score-num {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+    color: {{ score_color }};
+  }
+  .score-max {
+    font-size: 18px;
+    color: #7BA4C8;
+  }
+  .score-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: {{ score_color }};
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  .summary-tiles {
+    display: flex;
+    gap: 14px;
+  }
+  .tile {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .tile-num {
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .tile-label {
+    font-size: 13px;
+    color: #7BA4C8;
+    margin-top: 3px;
+  }
+  .critical { color: #E24B4A; }
+  .warning  { color: #EF9F27; }
+  .passing  { color: #1D9E75; }
+
+  .section {
+    padding: 28px 40px;
+    border-bottom: 1px solid #eee;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #9CA3AF;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .summary-text {
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.8;
+    background: #F9FAFB;
+    border-radius: 8px;
+    padding: 18px 20px;
+    border-left: 4px solid {{ score_color }};
+  }
+
+  .finding {
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .finding-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-fail  { background: #FEE2E2; color: #991B1B; }
+  .badge-warn  { background: #FEF3C7; color: #92400E; }
+  .badge-pass  { background: #D1FAE5; color: #065F46; }
+  .finding-fail  { background: #FFF5F5; border-color: #FECACA; }
+  .finding-warn  { background: #FFFBEB; border-color: #FDE68A; }
+  .finding-pass  { background: #F0FDF4; border-color: #BBF7D0; }
+  .finding-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    flex: 1;
+  }
+  .finding-score {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6B7280;
+  }
+  .finding-text {
+    font-size: 14px;
+    color: #4B5563;
+    line-height: 1.75;
+  }
+
+  .bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bar-label {
+    font-size: 14px;
+    color: #6B7280;
+    width: 160px;
+    flex-shrink: 0;
+  }
+  .bar-bg {
+    flex: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: #F3F4F6;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+  }
+  .bar-pct {
+    font-size: 13px;
+    font-weight: 700;
+    width: 40px;
+    text-align: right;
+  }
+
+  .cta {
+    background: #0F2744;
+    padding: 36px 40px;
+    text-align: center;
+  }
+  .cta-eyebrow {
+    font-size: 13px;
+    color: #7BA4C8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .cta-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .cta-text {
+    font-size: 15px;
+    color: #7BA4C8;
+    line-height: 1.75;
+    margin-bottom: 22px;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: #185FA5;
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .cta-footer {
+    font-size: 12px;
+    color: #4A6A8A;
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">ServOps IT Health Report</span>
+      </div>
+      <div class="report-title">{{ name }} - {{ domain }}</div>
+      <div class="report-meta">Scanned on {{ scan_date }}</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num">{{ total_score }}</div>
+      <div class="score-max">/100</div>
+      <div class="score-label">{{ score_label }}</div>
+    </div>
+  </div>
+  <div class="summary-tiles">
+    <div class="tile">
+      <div class="tile-num critical">{{ critical }}</div>
+      <div class="tile-label">Critical issues</div>
+    </div>
+    <div class="tile">
+      <div class="tile-num warning">{{ warnings }}</div>
+      <div class="tile-label">Warnings</div>
+    </div>
+    <div class="tile">
+      <div class="tile-num passing">{{ passing }}</div>
+      <div class="tile-label">Passing</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">What this means for your business</div>
+  <div class="summary-text">
+    Your IT health score is <strong>{{ total_score }} out of 100</strong>.
+    {% if score_status == 'fail' %}
+      Your business has serious security gaps that require immediate attention.
+      {% if critical > 0 %}
+        {{ critical }} critical issue{{ 's' if critical > 1 else '' }} need to be fixed right away.
+      {% endif %}
+    {% elif score_status == 'warn' %}
+      Your business has some security gaps that should be addressed soon to avoid risk.
+    {% else %}
+      Your business has a healthy IT posture. Keep monitoring regularly to stay protected.
+    {% endif %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Detailed findings</div>
+  {% for r in results %}
+  <div class="finding finding-{{ r.status }}">
+    <div class="finding-header">
+      <span class="badge badge-{{ r.status }}">
+        {% if r.status == 'fail' %}Critical
+        {% elif r.status == 'warn' %}Warning
+        {% else %}Passing{% endif %}
+      </span>
+      <span class="finding-title">{{ r.label }}</span>
+      <span class="finding-score">{{ r.score }}/100</span>
+    </div>
+    <div class="finding-text">{{ r.plain_english }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="section">
+  <div class="section-label">Score breakdown</div>
+  <div class="bars">
+    {% for r in results %}
+    <div class="bar-row">
+      <span class="bar-label">{{ r.label }}</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:{{ r.score }}%; background:
+          {% if r.status == 'pass' %}#1D9E75
+          {% elif r.status == 'warn' %}#EF9F27
+          {% else %}#E24B4A{% endif %};"></div>
+      </div>
+      <span class="bar-pct" style="color:
+        {% if r.status == 'pass' %}#1D9E75
+        {% elif r.status == 'warn' %}#EF9F27
+        {% else %}#E24B4A{% endif %};">{{ r.score }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="cta">
+  <div class="cta-eyebrow">Your next step</div>
+  <div class="cta-title">Want us to fix these issues for you?</div>
+  <div class="cta-text">
+    ServOps can resolve all critical and warning issues within 48 hours.<br/>
+    Book a free 15-minute call — no obligation, no technical jargon.
+  </div>
+  <a href="mailto:servopsca@gmail.com" class="cta-btn">
+    Book a free call with ServOps →
+  </a>
+  <div class="cta-footer">
+    ServOps · Windsor, Ontario · servopsca.com · +1 (519) 992-8997
+  </div>
+</div>
+
+</body>
+</html>
