@@ -23,7 +23,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://servopsca.netlify.app",
+        "https://vulscanner.netlify.app",
     ],
     allow_methods=["*"],
     allow_headers=["*"],
