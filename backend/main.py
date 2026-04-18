@@ -25,6 +25,7 @@ app.add_middleware(
         "http://localhost:5173",
         "https://vulscanner.netlify.app",
     ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
