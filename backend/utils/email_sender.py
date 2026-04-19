@@ -28,7 +28,7 @@ def send_report_email(
     )
 
     subject = (
-        f"{score_emoji} Your IT Health Report — "
+        f"{score_emoji} Your IT Health Report - "
         f"{domain} scored {score['total_score']}/100"
     )
 

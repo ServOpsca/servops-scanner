@@ -69,7 +69,7 @@ def generate_pdf_report(
     pdf.set_x(14)
     pdf.set_font("Helvetica", "B", 18)
     pdf.set_text_color(255, 255, 255)
-    display = f"{name} — {domain}"
+    display = f"{name} - {domain}"
     pdf.cell(0, 10, display[:55], ln=True)
 
     # Scan date
@@ -275,12 +275,12 @@ def generate_pdf_report(
     pdf.set_xy(14, btn_y + 2)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(255, 255, 255)
-    pdf.cell(80, 6, "Book a free call — servopsca@gmail.com", align="C")
+    pdf.cell(80, 6, "Book a free call - servopsca@gmail.com", align="C")
 
     pdf.set_xy(14, btn_y + 12)
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(74, 106, 138)
-    pdf.cell(0, 5, "ServOps  .  Windsor, Ontario  .  servopsca.com  .  +1 (519) 992-8997")
+    pdf.cell(0, 5, "ServOps  |  Windsor, Ontario  |  servopsca.com  |  +1 (519) 992-8997")
 
     # ── SAVE ──────────────────────────────────────────────────
     filename = f"servops-report-{uuid.uuid4().hex[:8]}.pdf"
