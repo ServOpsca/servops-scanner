@@ -39,7 +39,7 @@ class ReportPDF(FPDF):
         self.set_y(-15)
         self.set_font("Helvetica", "I", 8)
         self.set_text_color(150, 150, 150)
-        self.cell(0, 10, f"ServOps IT Health Report — Page {self.page_no()}", align="C")
+        self.cell(0, 10, f"ServOps IT Health Report - Page {self.page_no()}", align="C")
 
 
 def generate_pdf_report(
@@ -266,7 +266,7 @@ def generate_pdf_report(
     pdf.set_text_color(123, 164, 200)
     pdf.multi_cell(182, 5,
         "ServOps can resolve all critical and warning issues within 48 hours. "
-        "Book a free 15-minute call — no obligation, no technical jargon."
+        "Book a free 15-minute call - no obligation, no technical jargon."
     )
 
     btn_y = pdf.get_y() + 3
