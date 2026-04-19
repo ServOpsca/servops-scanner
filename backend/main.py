@@ -118,13 +118,3 @@ async def run_scan(req: ScanRequest, background_tasks: BackgroundTasks):
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "ServOps Scanner API"}
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://YOUR-SITE.netlify.app",
-    ],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
