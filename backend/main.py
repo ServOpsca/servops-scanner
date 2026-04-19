@@ -25,7 +25,6 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
-    max_age=3600,
 )
 
 executor = ThreadPoolExecutor(max_workers=10)
