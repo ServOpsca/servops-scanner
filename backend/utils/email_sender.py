@@ -130,10 +130,10 @@ def send_report_email(
 
     # Send via Gmail SMTP
     with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.ehlo()
-    smtp.login(GMAIL_USER, GMAIL_PASSWORD)
-    smtp.sendmail(GMAIL_USER, to_email, msg.as_string())
-    
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(GMAIL_USER, GMAIL_PASSWORD)
+        smtp.sendmail(GMAIL_USER, to_email, msg.as_string())
+
     print(f"Report emailed to {to_email} via Gmail SMTP")
