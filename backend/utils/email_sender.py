@@ -1,16 +1,14 @@
 import os
-import smtplib
 import base64
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_USER     = os.environ["GMAIL_USER"]
-GMAIL_PASSWORD = os.environ["GMAIL_APP_PASSWORD"]
+BREVO_API_KEY    = os.environ["BREVO_API_KEY"]
+BREVO_FROM_EMAIL = os.environ.get("BREVO_FROM_EMAIL", "servopsca@gmail.com")
+BREVO_FROM_NAME  = os.environ.get("BREVO_FROM_NAME", "ServOps Reports")
+BREVO_API_URL    = "https://api.brevo.com/v3/smtp/email"
 
 
 def send_report_email(
@@ -55,34 +53,33 @@ def send_report_email(
 
         <div style="background:#fff;border:1px solid #e5e7eb;
                     border-radius:8px;padding:16px;margin-bottom:20px;">
-          <div style="display:flex;justify-content:space-between;
-                      align-items:center;">
-            <div>
-              <div style="font-size:11px;color:#9CA3AF;
-                          text-transform:uppercase;letter-spacing:1px;">
-                Overall score
-              </div>
-              <div style="font-size:32px;font-weight:700;
-                          color:{'#E24B4A' if score['status']=='fail'
-                                 else '#EF9F27' if score['status']=='warn'
-                                 else '#1D9E75'};">
-                {score['total_score']}/100
-              </div>
-              <div style="font-size:12px;color:#6B7280;">
-                {score['label']}
-              </div>
+          <div>
+            <div style="font-size:11px;color:#9CA3AF;
+                        text-transform:uppercase;letter-spacing:1px;">
+              Overall score
             </div>
-            <div style="text-align:right;">
-              <div style="font-size:12px;color:#E24B4A;font-weight:600;">
-                {score['critical']} critical
-              </div>
-              <div style="font-size:12px;color:#EF9F27;font-weight:600;">
-                {score['warnings']} warnings
-              </div>
-              <div style="font-size:12px;color:#1D9E75;font-weight:600;">
-                {score['passing']} passing
-              </div>
+            <div style="font-size:32px;font-weight:700;
+                        color:{'#E24B4A' if score['status']=='fail'
+                               else '#EF9F27' if score['status']=='warn'
+                               else '#1D9E75'};">
+              {score['total_score']}/100
             </div>
+            <div style="font-size:12px;color:#6B7280;">
+              {score['label']}
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <span style="font-size:12px;color:#E24B4A;
+                         font-weight:600;margin-right:12px;">
+              {score['critical']} critical
+            </span>
+            <span style="font-size:12px;color:#EF9F27;
+                         font-weight:600;margin-right:12px;">
+              {score['warnings']} warnings
+            </span>
+            <span style="font-size:12px;color:#1D9E75;font-weight:600;">
+              {score['passing']} passing
+            </span>
           </div>
         </div>
 
@@ -108,32 +105,49 @@ def send_report_email(
     </div>
     """
 
-    # Build email
-    msg = MIMEMultipart("mixed")
-    msg["From"]    = f"ServOps Reports <{GMAIL_USER}>"
-    msg["To"]      = to_email
-    msg["Subject"] = subject
-
-    # HTML body
-    msg.attach(MIMEText(html_body, "html"))
-
-    # PDF attachment
+    # Read and encode PDF as base64
     with open(pdf_path, "rb") as f:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header(
-            "Content-Disposition",
-            f"attachment; filename=servops-report-{domain}.pdf",
+        pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+    # Brevo API payload
+    payload = {
+        "sender": {
+            "name":  BREVO_FROM_NAME,
+            "email": BREVO_FROM_EMAIL,
+        },
+        "to": [
+            {
+                "email": to_email,
+                "name":  to_name,
+            }
+        ],
+        "subject":     subject,
+        "htmlContent": html_body,
+        "attachment": [
+            {
+                "content": pdf_base64,
+                "name":    f"servops-report-{domain}.pdf",
+            }
+        ],
+    }
+
+    headers = {
+        "accept":       "application/json",
+        "content-type": "application/json",
+        "api-key":      BREVO_API_KEY,
+    }
+
+    response = requests.post(
+        BREVO_API_URL,
+        json=payload,
+        headers=headers,
+        timeout=30,
+    )
+
+    if response.status_code not in (200, 201):
+        raise Exception(
+            f"Brevo API error {response.status_code}: {response.text}"
         )
-        msg.attach(part)
 
-    # Send via Gmail SMTP
-    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-        smtp.ehlo()
-        smtp.starttls()
-        smtp.ehlo()
-        smtp.login(GMAIL_USER, GMAIL_PASSWORD)
-        smtp.sendmail(GMAIL_USER, to_email, msg.as_string())
-
-    print(f"Report emailed to {to_email} via Gmail SMTP")
+    print(f"Report emailed to {to_email} via Brevo")
+    return response.json()
