@@ -313,27 +313,28 @@ def generate_pdf_report(
         bg_color=(29, 78, 216),
     )
 
-    pdf.set_y(msp_y + 24)
+    pdf.set_y(msp_y + 22)
 
     # ── CTA FOOTER ────────────────────────────────────────────
+    # Ensure footer fits on current page
+    if pdf.get_y() > 240:
+        pdf.add_page()
+
     cta_y = pdf.get_y() + 4
     pdf.set_fill_color(15, 39, 68)
-    pdf.rect(0, cta_y, 210, 40, "F")
+    pdf.rect(0, cta_y, 210, 30, "F")
 
-    pdf.set_xy(14, cta_y + 6)
-    pdf.set_font("Helvetica", "B", 14)
+    pdf.set_xy(14, cta_y + 5)
+    pdf.set_font("Helvetica", "B", 13)
     pdf.set_text_color(255, 255, 255)
-    pdf.cell(0, 8, "Want us to fix these issues for you?", ln=True)
+    pdf.cell(0, 7, "Want us to fix these issues for you?", ln=True)
 
     pdf.set_x(14)
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(123, 164, 200)
-    pdf.multi_cell(182, 5,
-        "ServOps can resolve all critical and warning issues within 48 hours. "
-        "No obligation, no jargon."
-    )
+    pdf.cell(0, 5, "ServOps can resolve all issues within 48 hours. No obligation.", ln=True)
 
-    pdf.set_xy(14, cta_y + 28)
+    pdf.set_x(14)
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(74, 106, 138)
     pdf.cell(0, 5, "ServOps | Windsor, Ontario | servopsca.com | +1 (519) 992-8997")
