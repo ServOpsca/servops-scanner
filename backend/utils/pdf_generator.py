@@ -30,6 +30,10 @@ STATUS_BORDER = {
     "fail": (254, 202, 202),
 }
 
+STRIPE_FIX        = "https://buy.stripe.com/4gMbJ1aJ44Hh1Jz3M34wM03"
+STRIPE_MONITORING = "https://buy.stripe.com/7sYfZh6sOehRfAp2HZ4wM01"
+STRIPE_MSP        = "https://buy.stripe.com/8x214n2cyehR2ND6Yf4wM02"
+
 
 class ReportPDF(FPDF):
     def header(self):
@@ -40,6 +44,16 @@ class ReportPDF(FPDF):
         self.set_font("Helvetica", "I", 8)
         self.set_text_color(150, 150, 150)
         self.cell(0, 10, f"ServOps IT Health Report - Page {self.page_no()}", align="C")
+
+
+def draw_link_button(pdf, x, y, w, h, text, url, bg_color, text_color=(255,255,255)):
+    """Draw a clickable button styled rectangle with a hyperlink."""
+    pdf.set_fill_color(*bg_color)
+    pdf.rect(x, y, w, h, "F")
+    pdf.set_xy(x, y)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.set_text_color(*text_color)
+    pdf.cell(w, h, text, align="C", link=url)
 
 
 def generate_pdf_report(
@@ -55,31 +69,28 @@ def generate_pdf_report(
 
     score_color = SCORE_COLORS.get(score["status"], (55, 138, 221))
 
-    # ── HEADER BLOCK ──────────────────────────────────────────
+    # ── HEADER ────────────────────────────────────────────────
     pdf.set_fill_color(15, 39, 68)
     pdf.rect(0, 0, 210, 70, "F")
 
-    # Brand label
     pdf.set_xy(14, 10)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(123, 164, 200)
     pdf.cell(0, 6, "SERVOPS IT HEALTH REPORT", ln=True)
 
-    # Domain title
     pdf.set_x(14)
     pdf.set_font("Helvetica", "B", 18)
     pdf.set_text_color(255, 255, 255)
     display = f"{name} - {domain}"
     pdf.cell(0, 10, display[:55], ln=True)
 
-    # Scan date
     pdf.set_x(14)
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(123, 164, 200)
     scan_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
     pdf.cell(0, 6, f"Scanned on {scan_date}", ln=True)
 
-    # Score circle (right side)
+    # Score
     pdf.set_xy(155, 8)
     pdf.set_font("Helvetica", "B", 42)
     pdf.set_text_color(*score_color)
@@ -95,7 +106,7 @@ def generate_pdf_report(
     pdf.set_text_color(*score_color)
     pdf.cell(40, 6, score["label"].upper(), align="C")
 
-    # ── SUMMARY TILES ─────────────────────────────────────────
+    # Summary tiles
     tile_y = 48
     tiles = [
         (score["critical"], "Critical issues", (226, 75, 74)),
@@ -104,8 +115,6 @@ def generate_pdf_report(
     ]
     tile_x = 14
     for num, label, color in tiles:
-        pdf.set_fill_color(255, 255, 255, )
-        pdf.set_draw_color(255, 255, 255)
         pdf.set_fill_color(30, 55, 85)
         pdf.rect(tile_x, tile_y, 55, 16, "F")
         pdf.set_xy(tile_x, tile_y + 1)
@@ -120,23 +129,19 @@ def generate_pdf_report(
 
     pdf.set_y(76)
 
-    # ── SUMMARY TEXT ──────────────────────────────────────────
+    # ── SUMMARY ───────────────────────────────────────────────
     pdf.set_x(14)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(150, 150, 150)
     pdf.cell(0, 6, "WHAT THIS MEANS FOR YOUR BUSINESS", ln=True)
     pdf.ln(2)
 
-    # Left accent bar
     pdf.set_fill_color(*score_color)
     pdf.rect(14, pdf.get_y(), 3, 18, "F")
-
     pdf.set_fill_color(249, 250, 251)
     pdf.rect(14, pdf.get_y(), 182, 18, "F")
 
-    summary = (
-        f"Your IT health score is {score['total_score']} out of 100. "
-    )
+    summary = f"Your IT health score is {score['total_score']} out of 100. "
     if score["status"] == "fail":
         summary += f"Your business has serious security gaps. {score['critical']} critical issue(s) need immediate attention."
     elif score["status"] == "warn":
@@ -150,7 +155,7 @@ def generate_pdf_report(
     pdf.multi_cell(172, 5, summary)
     pdf.ln(4)
 
-    # ── DETAILED FINDINGS ─────────────────────────────────────
+    # ── FINDINGS ──────────────────────────────────────────────
     pdf.set_x(14)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(150, 150, 150)
@@ -158,45 +163,40 @@ def generate_pdf_report(
     pdf.ln(2)
 
     for r in results:
-        color     = SCORE_COLORS[r["status"]]
-        bg        = STATUS_BG[r["status"]]
-        border    = STATUS_BORDER[r["status"]]
-        card_y    = pdf.get_y()
-        card_h    = 28
+        color  = SCORE_COLORS[r["status"]]
+        bg     = STATUS_BG[r["status"]]
+        border = STATUS_BORDER[r["status"]]
+        card_y = pdf.get_y()
+        card_h = 28
 
-        # Card background
         pdf.set_fill_color(*bg)
         pdf.set_draw_color(*border)
         pdf.rect(14, card_y, 182, card_h, "FD")
 
-        # Badge
         pdf.set_fill_color(*color)
         pdf.set_xy(17, card_y + 4)
         pdf.set_font("Helvetica", "B", 7)
         pdf.set_text_color(255, 255, 255)
-        badge_text = STATUS_LABELS[r["status"]]
-        pdf.cell(18, 5, badge_text, fill=True, align="C")
+        pdf.cell(18, 5, STATUS_LABELS[r["status"]], fill=True, align="C")
 
-        # Check label
         pdf.set_xy(38, card_y + 3)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(17, 24, 39)
         pdf.cell(120, 6, r["label"])
 
-        # Score
         pdf.set_xy(163, card_y + 3)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(*color)
         pdf.cell(30, 6, f"{r['score']}/100", align="R")
 
-        # Plain English text
         pdf.set_xy(17, card_y + 11)
         pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(75, 85, 99)
         pdf.multi_cell(175, 4.5, r["plain_english"])
 
-        new_y = pdf.get_y()
+        new_y    = pdf.get_y()
         actual_h = new_y - card_y + 3
+
         if actual_h > card_h:
             pdf.set_fill_color(*bg)
             pdf.set_draw_color(*border)
@@ -210,7 +210,7 @@ def generate_pdf_report(
 
     pdf.ln(2)
 
-    # ── SCORE BREAKDOWN ───────────────────────────────────────
+    # ── SCORE BARS ────────────────────────────────────────────
     pdf.set_x(14)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(150, 150, 150)
@@ -226,61 +226,117 @@ def generate_pdf_report(
         pdf.set_text_color(107, 114, 128)
         pdf.cell(50, 6, r["label"])
 
-        # Bar background
-        bar_x = 66
+        bar_x  = 66
+        fill_w = int(r["score"] / 100 * 120)
+
         pdf.set_fill_color(243, 244, 246)
         pdf.rect(bar_x, bar_y + 1, 120, 4, "F")
 
-        # Bar fill
-        fill_w = int(r["score"] / 100 * 120)
         if fill_w > 0:
             pdf.set_fill_color(*color)
             pdf.rect(bar_x, bar_y + 1, fill_w, 4, "F")
 
-        # Percentage
         pdf.set_xy(190, bar_y)
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_text_color(*color)
         pdf.cell(16, 6, f"{r['score']}%", align="R")
         pdf.ln(7)
 
-    pdf.ln(4)
+    pdf.ln(6)
 
-    # ── CTA BLOCK ─────────────────────────────────────────────
-    cta_y = pdf.get_y()
+    # ── PAYMENT BUTTONS ───────────────────────────────────────
+    pdf.set_x(14)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_text_color(150, 150, 150)
+    pdf.cell(0, 6, "WHAT WOULD YOU LIKE TO DO NEXT?", ln=True)
+    pdf.ln(3)
+
+    btn_y = pdf.get_y()
+
+    if score["status"] != "pass":
+        # Fix it for me button
+        draw_link_button(
+            pdf, x=14, y=btn_y, w=85, h=10,
+            text="Fix it for me - $200 one-time",
+            url=STRIPE_FIX,
+            bg_color=(226, 75, 74),
+        )
+        # Monthly monitoring button
+        draw_link_button(
+            pdf, x=105, y=btn_y, w=90, h=10,
+            text="Monthly monitoring - $97/mo",
+            url=STRIPE_MONITORING,
+            bg_color=(24, 95, 165),
+        )
+    else:
+        # Only monitoring if passing
+        draw_link_button(
+            pdf, x=14, y=btn_y, w=120, h=10,
+            text="Stay protected - Monthly monitoring $97/mo",
+            url=STRIPE_MONITORING,
+            bg_color=(24, 95, 165),
+        )
+
+    pdf.ln(14)
+
+    # Book a call link
+    pdf.set_x(14)
+    pdf.set_font("Helvetica", "U", 9)
+    pdf.set_text_color(24, 95, 165)
+    pdf.cell(
+        0, 6,
+        "Or book a free 15-min call with ServOps - servopsca@gmail.com",
+        link="mailto:servopsca@gmail.com?subject=Free call request"
+    )
+    pdf.ln(10)
+
+    # MSP callout box
+    pdf.set_fill_color(239, 246, 255)
+    pdf.set_draw_color(191, 219, 254)
+    msp_y = pdf.get_y()
+    pdf.rect(14, msp_y, 182, 20, "FD")
+
+    pdf.set_xy(17, msp_y + 3)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_text_color(29, 78, 216)
+    pdf.cell(0, 5, "Are you an MSP or IT provider?", ln=True)
+
+    pdf.set_x(17)
+    pdf.set_font("Helvetica", "", 8)
+    pdf.set_text_color(55, 65, 81)
+    pdf.cell(140, 5, "White-label this scanner under your own brand. $149/mo.")
+
+    draw_link_button(
+        pdf, x=158, y=msp_y + 5, w=35, h=8,
+        text="Get access",
+        url=STRIPE_MSP,
+        bg_color=(29, 78, 216),
+    )
+
+    pdf.set_y(msp_y + 24)
+
+    # ── CTA FOOTER ────────────────────────────────────────────
+    cta_y = pdf.get_y() + 4
     pdf.set_fill_color(15, 39, 68)
-    pdf.rect(0, cta_y, 210, 55, "F")
+    pdf.rect(0, cta_y, 210, 40, "F")
 
     pdf.set_xy(14, cta_y + 6)
-    pdf.set_font("Helvetica", "", 9)
-    pdf.set_text_color(123, 164, 200)
-    pdf.cell(0, 5, "YOUR NEXT STEP", ln=True)
-
-    pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_font("Helvetica", "B", 14)
     pdf.set_text_color(255, 255, 255)
-    pdf.cell(0, 9, "Want us to fix these issues for you?", ln=True)
+    pdf.cell(0, 8, "Want us to fix these issues for you?", ln=True)
 
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "", 10)
+    pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(123, 164, 200)
     pdf.multi_cell(182, 5,
         "ServOps can resolve all critical and warning issues within 48 hours. "
-        "Book a free 15-minute call - no obligation, no technical jargon."
+        "No obligation, no jargon."
     )
 
-    btn_y = pdf.get_y() + 3
-    pdf.set_fill_color(24, 95, 165)
-    pdf.rect(14, btn_y, 80, 10, "F")
-    pdf.set_xy(14, btn_y + 2)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.set_text_color(255, 255, 255)
-    pdf.cell(80, 6, "Book a free call - servopsca@gmail.com", align="C")
-
-    pdf.set_xy(14, btn_y + 12)
+    pdf.set_xy(14, cta_y + 28)
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(74, 106, 138)
-    pdf.cell(0, 5, "ServOps  |  Windsor, Ontario  |  servopsca.com  |  +1 (519) 992-8997")
+    pdf.cell(0, 5, "ServOps | Windsor, Ontario | servopsca.com | +1 (519) 992-8997")
 
     # ── SAVE ──────────────────────────────────────────────────
     filename = f"servops-report-{uuid.uuid4().hex[:8]}.pdf"
