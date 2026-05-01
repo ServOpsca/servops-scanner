@@ -18,6 +18,12 @@ const SCORE_COLORS = {
   fail: "#E24B4A",
 };
 
+const STRIPE_LINKS = {
+  fix:        "https://buy.stripe.com/4gMbJ1aJ44Hh1Jz3M34wM03",
+  monitoring: "https://buy.stripe.com/7sYfZh6sOehRfAp2HZ4wM01",
+  msp:        "https://buy.stripe.com/8x214n2cyehR2ND6Yf4wM02",
+};
+
 export default function Results() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,9 +54,12 @@ export default function Results() {
           <div style={styles.logoDot} />
           <span style={styles.logoText}>ServOps</span>
         </div>
-        <button style={styles.newScanBtn} onClick={() => navigate("/")}>
-          Scan another domain
-        </button>
+        <div style={styles.navRight}>
+          <a href="/pricing" style={styles.navLink}>Pricing</a>
+          <button style={styles.newScanBtn} onClick={() => navigate("/")}>
+            Scan another domain
+          </button>
+        </div>
       </nav>
 
       <div style={styles.content}>
@@ -75,21 +84,15 @@ export default function Results() {
         {/* SUMMARY TILES */}
         <div style={styles.tilesRow}>
           <div style={{ ...styles.tile, borderColor: "#E24B4A" }}>
-            <span style={{ ...styles.tileNum, color: "#E24B4A" }}>
-              {score.critical}
-            </span>
+            <span style={{ ...styles.tileNum, color: "#E24B4A" }}>{score.critical}</span>
             <span style={styles.tileLabel}>Critical</span>
           </div>
           <div style={{ ...styles.tile, borderColor: "#EF9F27" }}>
-            <span style={{ ...styles.tileNum, color: "#EF9F27" }}>
-              {score.warnings}
-            </span>
+            <span style={{ ...styles.tileNum, color: "#EF9F27" }}>{score.warnings}</span>
             <span style={styles.tileLabel}>Warnings</span>
           </div>
           <div style={{ ...styles.tile, borderColor: "#1D9E75" }}>
-            <span style={{ ...styles.tileNum, color: "#1D9E75" }}>
-              {score.passing}
-            </span>
+            <span style={{ ...styles.tileNum, color: "#1D9E75" }}>{score.passing}</span>
             <span style={styles.tileLabel}>Passing</span>
           </div>
         </div>
@@ -101,14 +104,10 @@ export default function Results() {
             Your IT health score is{" "}
             <span style={{ color: scoreColor, fontWeight: 500 }}>
               {score.total_score} out of 100
-            </span>
-            .{" "}
-            {score.status === "fail" &&
-              "Your business has several security gaps that need immediate attention."}
-            {score.status === "warn" &&
-              "Your business has some security gaps that should be addressed soon."}
-            {score.status === "pass" &&
-              "Your business has a healthy IT posture. Keep it up."}
+            </span>.{" "}
+            {score.status === "fail" && "Your business has several security gaps that need immediate attention."}
+            {score.status === "warn" && "Your business has some security gaps that should be addressed soon."}
+            {score.status === "pass" && "Your business has a healthy IT posture. Keep it up."}
             {score.critical > 0 &&
               ` ${score.critical} critical issue${score.critical > 1 ? "s" : ""} require immediate action.`}
           </p>
@@ -172,20 +171,47 @@ export default function Results() {
           </div>
         </div>
 
-        {/* CTA */}
+        {/* CTA BOX */}
         <div style={styles.ctaBox}>
           <p style={styles.ctaEyebrow}>Your next step</p>
-          <h2 style={styles.ctaTitle}>Want us to fix these issues for you?</h2>
+          <h2 style={styles.ctaTitle}>
+            {score.status === "pass"
+              ? "Stay protected with monthly monitoring"
+              : "Want us to fix these issues for you?"}
+          </h2>
           <p style={styles.ctaText}>
-            ServOps can resolve all critical and warning issues within 48 hours.
-            Book a free 15-minute call — no obligation, no technical jargon.
+            {score.status === "pass"
+              ? "Your IT looks healthy — keep it that way with automated monthly scans and instant alerts."
+              : "ServOps can resolve all critical and warning issues within 48 hours. Flat fee, no surprises."}
           </p>
-          <a
-            href="mailto:servopsca@gmail.com?subject=IT Health Report — Fix Request"
-            style={styles.ctaBtn}
-          >
-            Book a free call with ServOps →
-          </a>
+
+          <div style={styles.ctaOptions}>
+            {score.status !== "pass" && (
+              <a
+                href={STRIPE_LINKS.fix}
+                target="_blank"
+                rel="noreferrer"
+                style={styles.ctaBtnPrimary}
+              >
+                Fix it for me — $200 one-time →
+              </a>
+            )}
+            <a
+              href={STRIPE_LINKS.monitoring}
+              target="_blank"
+              rel="noreferrer"
+              style={styles.ctaBtnSecondary}
+            >
+              Monthly monitoring — $97/mo →
+            </a>
+            <a
+              href="mailto:servopsca@gmail.com?subject=Free call request"
+              style={styles.ctaBtnGhost}
+            >
+              Book a free 15-min call instead
+            </a>
+          </div>
+
           <p style={styles.ctaFooter}>
             ServOps · Windsor, Ontario · servopsca.com · +1 (519) 992-8997
           </p>
@@ -194,7 +220,7 @@ export default function Results() {
         {/* NEW SCAN */}
         <div style={styles.newScanRow}>
           <button style={styles.newScanLink} onClick={() => navigate("/")}>
-            ← Scan another domain
+            Scan another domain
           </button>
         </div>
 
@@ -223,6 +249,8 @@ const styles = {
   logoRow: { display: "flex", alignItems: "center", gap: 8 },
   logoDot: { width: 8, height: 8, borderRadius: "50%", background: "#378ADD" },
   logoText: { fontSize: 14, fontWeight: 500, color: "#fff" },
+  navRight: { display: "flex", alignItems: "center", gap: 16 },
+  navLink: { fontSize: 13, color: "#7BA4C8", textDecoration: "none" },
   newScanBtn: {
     background: "transparent",
     border: "0.5px solid rgba(255,255,255,0.15)",
@@ -233,8 +261,7 @@ const styles = {
   scoreHeader: {
     display: "flex", justifyContent: "space-between",
     alignItems: "flex-start", marginBottom: 24,
-    background: "#0F2744", borderRadius: 12,
-    padding: "24px",
+    background: "#0F2744", borderRadius: 12, padding: "24px",
   },
   scanLabel: { fontSize: 12, color: "#7BA4C8", margin: "0 0 4px" },
   domainTitle: { fontSize: 20, fontWeight: 500, color: "#fff", margin: 0 },
@@ -251,8 +278,7 @@ const styles = {
   },
   tile: {
     background: "rgba(255,255,255,0.03)",
-    border: "0.5px solid",
-    borderRadius: 10, padding: "14px",
+    border: "0.5px solid", borderRadius: 10, padding: "14px",
     display: "flex", flexDirection: "column",
     alignItems: "center", gap: 4,
   },
@@ -275,8 +301,7 @@ const styles = {
   },
   findingsList: { display: "flex", flexDirection: "column", gap: 10 },
   findingCard: {
-    border: "0.5px solid",
-    borderRadius: 10, padding: "14px 16px",
+    border: "0.5px solid", borderRadius: 10, padding: "14px 16px",
   },
   findingHeader: {
     display: "flex", alignItems: "center",
@@ -284,8 +309,7 @@ const styles = {
   },
   findingBadge: {
     fontSize: 10, fontWeight: 500,
-    padding: "3px 10px", borderRadius: 20,
-    letterSpacing: "0.5px",
+    padding: "3px 10px", borderRadius: 20, letterSpacing: "0.5px",
   },
   findingTitle: { fontSize: 13, fontWeight: 500, color: "#fff", flex: 1 },
   findingScore: { fontSize: 12, fontWeight: 500 },
@@ -301,8 +325,7 @@ const styles = {
   barPct: { fontSize: 11, fontWeight: 500, width: 36, textAlign: "right" },
   ctaBox: {
     background: "#0F2744", borderRadius: 12,
-    padding: "28px 24px", textAlign: "center",
-    marginBottom: 20,
+    padding: "28px 24px", textAlign: "center", marginBottom: 20,
   },
   ctaEyebrow: { fontSize: 12, color: "#7BA4C8", margin: "0 0 6px" },
   ctaTitle: { fontSize: 18, fontWeight: 500, color: "#fff", margin: "0 0 10px" },
@@ -310,11 +333,25 @@ const styles = {
     fontSize: 13, color: "#7BA4C8",
     lineHeight: 1.7, margin: "0 0 20px",
   },
-  ctaBtn: {
-    display: "inline-block",
-    background: "#185FA5", color: "#fff",
+  ctaOptions: {
+    display: "flex", flexDirection: "column", gap: 10, marginBottom: 20,
+  },
+  ctaBtnPrimary: {
+    display: "block", background: "#185FA5", color: "#fff",
     textDecoration: "none", borderRadius: 8,
-    padding: "12px 24px", fontSize: 14, fontWeight: 500,
+    padding: "13px 24px", fontSize: 14, fontWeight: 500, textAlign: "center",
+  },
+  ctaBtnSecondary: {
+    display: "block", background: "rgba(55,138,221,0.15)",
+    color: "#85B7EB", textDecoration: "none", borderRadius: 8,
+    padding: "13px 24px", fontSize: 14, fontWeight: 500, textAlign: "center",
+    border: "0.5px solid rgba(55,138,221,0.3)",
+  },
+  ctaBtnGhost: {
+    display: "block", background: "transparent",
+    color: "#4A6A8A", textDecoration: "none",
+    borderRadius: 8, padding: "10px 24px",
+    fontSize: 13, textAlign: "center",
   },
   ctaFooter: { fontSize: 11, color: "#4A6A8A", margin: "16px 0 0" },
   newScanRow: { textAlign: "center" },
@@ -323,8 +360,7 @@ const styles = {
     color: "#4A6A8A", fontSize: 13, cursor: "pointer",
   },
   backBtn: {
-    background: "#185FA5", color: "#fff",
-    border: "none", borderRadius: 8,
-    padding: "10px 24px", fontSize: 13, cursor: "pointer",
+    background: "#185FA5", color: "#fff", border: "none",
+    borderRadius: 8, padding: "10px 24px", fontSize: 13, cursor: "pointer",
   },
 };
