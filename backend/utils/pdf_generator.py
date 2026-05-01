@@ -40,20 +40,10 @@ class ReportPDF(FPDF):
         pass
 
     def footer(self):
-        self.set_y(-15)
-        self.set_font("Helvetica", "I", 8)
-        self.set_text_color(150, 150, 150)
-        self.cell(0, 10, f"ServOps IT Health Report - Page {self.page_no()}", align="C")
-
-
-def draw_link_button(pdf, x, y, w, h, text, url, bg_color, text_color=(255,255,255)):
-    """Draw a clickable button styled rectangle with a hyperlink."""
-    pdf.set_fill_color(*bg_color)
-    pdf.rect(x, y, w, h, "F")
-    pdf.set_xy(x, y)
-    pdf.set_font("Helvetica", "B", 10)
-    pdf.set_text_color(*text_color)
-    pdf.cell(w, h, text, align="C", link=url)
+        self.set_y(-12)
+        self.set_font("Helvetica", "I", 7)
+        self.set_text_color(180, 180, 180)
+        self.cell(0, 6, f"ServOps IT Health Report - Page {self.page_no()}", align="C")
 
 
 def generate_pdf_report(
@@ -63,7 +53,7 @@ def generate_pdf_report(
     score:   dict,
 ) -> str:
     pdf = ReportPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     pdf.set_margins(0, 0, 0)
 
@@ -71,273 +61,266 @@ def generate_pdf_report(
 
     # ── HEADER ────────────────────────────────────────────────
     pdf.set_fill_color(15, 39, 68)
-    pdf.rect(0, 0, 210, 70, "F")
+    pdf.rect(0, 0, 210, 66, "F")
 
-    pdf.set_xy(14, 10)
+    pdf.set_xy(14, 9)
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(123, 164, 200)
-    pdf.cell(0, 6, "SERVOPS IT HEALTH REPORT", ln=True)
+    pdf.cell(0, 5, "SERVOPS IT HEALTH REPORT", ln=True)
 
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 18)
+    pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(255, 255, 255)
     display = f"{name} - {domain}"
-    pdf.cell(0, 10, display[:55], ln=True)
+    pdf.cell(0, 9, display[:55], ln=True)
 
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "", 10)
+    pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(123, 164, 200)
     scan_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
-    pdf.cell(0, 6, f"Scanned on {scan_date}", ln=True)
+    pdf.cell(0, 5, f"Scanned on {scan_date}", ln=True)
 
-    # Score
-    pdf.set_xy(155, 8)
-    pdf.set_font("Helvetica", "B", 42)
+    # Score (right side)
+    pdf.set_xy(152, 7)
+    pdf.set_font("Helvetica", "B", 38)
     pdf.set_text_color(*score_color)
-    pdf.cell(40, 20, str(score["total_score"]), align="C")
+    pdf.cell(44, 18, str(score["total_score"]), align="C")
 
-    pdf.set_xy(155, 28)
-    pdf.set_font("Helvetica", "", 12)
+    pdf.set_xy(152, 25)
+    pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(123, 164, 200)
-    pdf.cell(40, 6, "/100", align="C")
+    pdf.cell(44, 5, "/100", align="C")
 
-    pdf.set_xy(155, 35)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_xy(152, 31)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(*score_color)
-    pdf.cell(40, 6, score["label"].upper(), align="C")
+    pdf.cell(44, 5, score["label"].upper(), align="C")
 
-    # Summary tiles
-    tile_y = 48
+    # Tiles
+    tile_y = 46
     tiles = [
-        (score["critical"], "Critical issues", (226, 75, 74)),
-        (score["warnings"], "Warnings",        (239, 159, 39)),
-        (score["passing"],  "Passing",          (29, 158, 117)),
+        (score["critical"], "Critical", (226, 75, 74)),
+        (score["warnings"], "Warnings", (239, 159, 39)),
+        (score["passing"],  "Passing",  (29, 158, 117)),
     ]
     tile_x = 14
     for num, label, color in tiles:
         pdf.set_fill_color(30, 55, 85)
-        pdf.rect(tile_x, tile_y, 55, 16, "F")
+        pdf.rect(tile_x, tile_y, 52, 14, "F")
         pdf.set_xy(tile_x, tile_y + 1)
-        pdf.set_font("Helvetica", "B", 18)
+        pdf.set_font("Helvetica", "B", 16)
         pdf.set_text_color(*color)
-        pdf.cell(55, 8, str(num), align="C")
-        pdf.set_xy(tile_x, tile_y + 9)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.cell(52, 7, str(num), align="C")
+        pdf.set_xy(tile_x, tile_y + 8)
+        pdf.set_font("Helvetica", "", 7)
         pdf.set_text_color(123, 164, 200)
-        pdf.cell(55, 5, label, align="C")
-        tile_x += 58
+        pdf.cell(52, 4, label, align="C")
+        tile_x += 55
 
-    pdf.set_y(76)
+    pdf.set_y(70)
 
     # ── SUMMARY ───────────────────────────────────────────────
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, "WHAT THIS MEANS FOR YOUR BUSINESS", ln=True)
-    pdf.ln(2)
+    pdf.cell(0, 5, "WHAT THIS MEANS FOR YOUR BUSINESS", ln=True)
+    pdf.ln(1)
 
+    sum_y = pdf.get_y()
     pdf.set_fill_color(*score_color)
-    pdf.rect(14, pdf.get_y(), 3, 18, "F")
+    pdf.rect(14, sum_y, 3, 14, "F")
     pdf.set_fill_color(249, 250, 251)
-    pdf.rect(14, pdf.get_y(), 182, 18, "F")
+    pdf.rect(14, sum_y, 182, 14, "F")
 
     summary = f"Your IT health score is {score['total_score']} out of 100. "
     if score["status"] == "fail":
-        summary += f"Your business has serious security gaps. {score['critical']} critical issue(s) need immediate attention."
+        summary += f"Serious security gaps found. {score['critical']} critical issue(s) need immediate attention."
     elif score["status"] == "warn":
-        summary += "Your business has some security gaps that should be addressed soon."
+        summary += "Some security gaps should be addressed soon to reduce risk."
     else:
-        summary += "Your business has a healthy IT posture. Keep monitoring regularly."
+        summary += "Your IT posture looks healthy. Keep monitoring regularly."
 
-    pdf.set_xy(20, pdf.get_y() + 3)
-    pdf.set_font("Helvetica", "", 10)
+    pdf.set_xy(20, sum_y + 2)
+    pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(55, 65, 81)
-    pdf.multi_cell(172, 5, summary)
-    pdf.ln(4)
+    pdf.multi_cell(172, 4.5, summary)
+    pdf.ln(3)
 
     # ── FINDINGS ──────────────────────────────────────────────
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, "DETAILED FINDINGS", ln=True)
-    pdf.ln(2)
+    pdf.cell(0, 5, "DETAILED FINDINGS", ln=True)
+    pdf.ln(1)
 
     for r in results:
         color  = SCORE_COLORS[r["status"]]
         bg     = STATUS_BG[r["status"]]
         border = STATUS_BORDER[r["status"]]
         card_y = pdf.get_y()
-        card_h = 28
+
+        # Estimate height needed
+        text_lines = len(r["plain_english"]) // 90 + 1
+        card_h = 10 + (text_lines * 4.5)
 
         pdf.set_fill_color(*bg)
         pdf.set_draw_color(*border)
         pdf.rect(14, card_y, 182, card_h, "FD")
 
         pdf.set_fill_color(*color)
-        pdf.set_xy(17, card_y + 4)
-        pdf.set_font("Helvetica", "B", 7)
+        pdf.set_xy(17, card_y + 3)
+        pdf.set_font("Helvetica", "B", 6)
         pdf.set_text_color(255, 255, 255)
-        pdf.cell(18, 5, STATUS_LABELS[r["status"]], fill=True, align="C")
+        pdf.cell(16, 4, STATUS_LABELS[r["status"]], fill=True, align="C")
 
-        pdf.set_xy(38, card_y + 3)
-        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_xy(36, card_y + 2)
+        pdf.set_font("Helvetica", "B", 10)
         pdf.set_text_color(17, 24, 39)
-        pdf.cell(120, 6, r["label"])
+        pdf.cell(120, 5, r["label"])
 
-        pdf.set_xy(163, card_y + 3)
-        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_xy(163, card_y + 2)
+        pdf.set_font("Helvetica", "B", 10)
         pdf.set_text_color(*color)
-        pdf.cell(30, 6, f"{r['score']}/100", align="R")
+        pdf.cell(30, 5, f"{r['score']}/100", align="R")
 
-        pdf.set_xy(17, card_y + 11)
-        pdf.set_font("Helvetica", "", 9)
+        pdf.set_xy(17, card_y + 8)
+        pdf.set_font("Helvetica", "", 8)
         pdf.set_text_color(75, 85, 99)
-        pdf.multi_cell(175, 4.5, r["plain_english"])
+        pdf.multi_cell(175, 4, r["plain_english"])
 
-        new_y    = pdf.get_y()
-        actual_h = new_y - card_y + 3
+        pdf.set_y(card_y + card_h + 2)
 
-        if actual_h > card_h:
-            pdf.set_fill_color(*bg)
-            pdf.set_draw_color(*border)
-            pdf.rect(14, card_y, 182, actual_h, "FD")
-            pdf.set_xy(17, card_y + 11)
-            pdf.set_font("Helvetica", "", 9)
-            pdf.set_text_color(75, 85, 99)
-            pdf.multi_cell(175, 4.5, r["plain_english"])
-
-        pdf.set_y(card_y + actual_h + 3)
-
-    pdf.ln(2)
+    pdf.ln(1)
 
     # ── SCORE BARS ────────────────────────────────────────────
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, "SCORE BREAKDOWN", ln=True)
-    pdf.ln(2)
+    pdf.cell(0, 5, "SCORE BREAKDOWN", ln=True)
+    pdf.ln(1)
 
     for r in results:
         color = SCORE_COLORS[r["status"]]
         bar_y = pdf.get_y()
 
         pdf.set_x(14)
-        pdf.set_font("Helvetica", "", 10)
+        pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(107, 114, 128)
-        pdf.cell(50, 6, r["label"])
+        pdf.cell(48, 5, r["label"])
 
-        bar_x  = 66
-        fill_w = int(r["score"] / 100 * 120)
-
+        fill_w = int(r["score"] / 100 * 118)
         pdf.set_fill_color(243, 244, 246)
-        pdf.rect(bar_x, bar_y + 1, 120, 4, "F")
+        pdf.rect(64, bar_y + 1, 118, 3.5, "F")
 
         if fill_w > 0:
             pdf.set_fill_color(*color)
-            pdf.rect(bar_x, bar_y + 1, fill_w, 4, "F")
+            pdf.rect(64, bar_y + 1, fill_w, 3.5, "F")
 
-        pdf.set_xy(190, bar_y)
-        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_xy(186, bar_y)
+        pdf.set_font("Helvetica", "B", 8)
         pdf.set_text_color(*color)
-        pdf.cell(16, 6, f"{r['score']}%", align="R")
-        pdf.ln(7)
+        pdf.cell(18, 5, f"{r['score']}%", align="R")
+        pdf.ln(5.5)
 
-    pdf.ln(6)
+    pdf.ln(3)
 
     # ── PAYMENT BUTTONS ───────────────────────────────────────
+    # Check if enough space remains — if not, add new page
+    remaining = 282 - pdf.get_y()
+    if remaining < 55:
+        pdf.add_page()
+        pdf.set_y(14)
+
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, "WHAT WOULD YOU LIKE TO DO NEXT?", ln=True)
-    pdf.ln(3)
+    pdf.cell(0, 5, "WHAT WOULD YOU LIKE TO DO NEXT?", ln=True)
+    pdf.ln(2)
 
     btn_y = pdf.get_y()
 
     if score["status"] != "pass":
-        # Fix it for me button
-        draw_link_button(
-            pdf, x=14, y=btn_y, w=85, h=10,
-            text="Fix it for me - $200 one-time",
-            url=STRIPE_FIX,
-            bg_color=(226, 75, 74),
-        )
-        # Monthly monitoring button
-        draw_link_button(
-            pdf, x=105, y=btn_y, w=90, h=10,
-            text="Monthly monitoring - $97/mo",
-            url=STRIPE_MONITORING,
-            bg_color=(24, 95, 165),
-        )
-    else:
-        # Only monitoring if passing
-        draw_link_button(
-            pdf, x=14, y=btn_y, w=120, h=10,
-            text="Stay protected - Monthly monitoring $97/mo",
-            url=STRIPE_MONITORING,
-            bg_color=(24, 95, 165),
-        )
+        # Fix it button
+        pdf.set_fill_color(226, 75, 74)
+        pdf.rect(14, btn_y, 88, 9, "F")
+        pdf.set_xy(14, btn_y + 1)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(88, 7, "Fix it for me - $200 one-time", align="C",
+                 link=STRIPE_FIX)
 
-    pdf.ln(14)
+        # Monitoring button
+        pdf.set_fill_color(24, 95, 165)
+        pdf.rect(106, btn_y, 90, 9, "F")
+        pdf.set_xy(106, btn_y + 1)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(90, 7, "Monthly monitoring - $97/mo", align="C",
+                 link=STRIPE_MONITORING)
+    else:
+        pdf.set_fill_color(24, 95, 165)
+        pdf.rect(14, btn_y, 130, 9, "F")
+        pdf.set_xy(14, btn_y + 1)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(130, 7, "Stay protected - Monthly monitoring $97/mo",
+                 align="C", link=STRIPE_MONITORING)
+
+    pdf.ln(12)
 
     # Book a call link
     pdf.set_x(14)
-    pdf.set_font("Helvetica", "U", 9)
+    pdf.set_font("Helvetica", "U", 8)
     pdf.set_text_color(24, 95, 165)
-    pdf.cell(
-        0, 6,
-        "Or book a free 15-min call with ServOps - servopsca@gmail.com",
-        link="mailto:servopsca@gmail.com?subject=Free call request"
-    )
-    pdf.ln(10)
+    pdf.cell(0, 5,
+             "Book a free 15-min call - servopsca@gmail.com",
+             link="mailto:servopsca@gmail.com?subject=Free call request")
+    pdf.ln(8)
 
-    # MSP callout box
+    # MSP box
+    msp_y = pdf.get_y()
     pdf.set_fill_color(239, 246, 255)
     pdf.set_draw_color(191, 219, 254)
-    msp_y = pdf.get_y()
-    pdf.rect(14, msp_y, 182, 20, "FD")
+    pdf.rect(14, msp_y, 182, 16, "FD")
 
-    pdf.set_xy(17, msp_y + 3)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_xy(17, msp_y + 2)
+    pdf.set_font("Helvetica", "B", 8)
     pdf.set_text_color(29, 78, 216)
-    pdf.cell(0, 5, "Are you an MSP or IT provider?", ln=True)
+    pdf.cell(0, 4, "Are you an MSP or IT provider?", ln=True)
 
     pdf.set_x(17)
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(55, 65, 81)
-    pdf.cell(140, 5, "White-label this scanner under your own brand. $149/mo.")
+    pdf.cell(138, 4, "White-label this scanner under your own brand. $149/mo.")
 
-    draw_link_button(
-        pdf, x=158, y=msp_y + 5, w=35, h=8,
-        text="Get access",
-        url=STRIPE_MSP,
-        bg_color=(29, 78, 216),
-    )
+    pdf.set_fill_color(29, 78, 216)
+    pdf.rect(158, msp_y + 4, 34, 7, "F")
+    pdf.set_xy(158, msp_y + 4)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(255, 255, 255)
+    pdf.cell(34, 7, "Get access", align="C", link=STRIPE_MSP)
 
-    pdf.set_y(msp_y + 22)
+    pdf.set_y(msp_y + 20)
 
     # ── CTA FOOTER ────────────────────────────────────────────
-    # Ensure footer fits on current page
-    if pdf.get_y() > 240:
-        pdf.add_page()
-
-    cta_y = pdf.get_y() + 4
+    cta_y = pdf.get_y() + 2
     pdf.set_fill_color(15, 39, 68)
-    pdf.rect(0, cta_y, 210, 30, "F")
+    pdf.rect(0, cta_y, 210, 26, "F")
 
-    pdf.set_xy(14, cta_y + 5)
-    pdf.set_font("Helvetica", "B", 13)
+    pdf.set_xy(14, cta_y + 4)
+    pdf.set_font("Helvetica", "B", 12)
     pdf.set_text_color(255, 255, 255)
-    pdf.cell(0, 7, "Want us to fix these issues for you?", ln=True)
-
-    pdf.set_x(14)
-    pdf.set_font("Helvetica", "", 9)
-    pdf.set_text_color(123, 164, 200)
-    pdf.cell(0, 5, "ServOps can resolve all issues within 48 hours. No obligation.", ln=True)
+    pdf.cell(0, 6, "Want us to fix these issues for you?", ln=True)
 
     pdf.set_x(14)
     pdf.set_font("Helvetica", "", 8)
+    pdf.set_text_color(123, 164, 200)
+    pdf.cell(0, 4, "ServOps resolves all issues within 48hrs. No obligation, no jargon.", ln=True)
+
+    pdf.set_x(14)
+    pdf.set_font("Helvetica", "", 7)
     pdf.set_text_color(74, 106, 138)
-    pdf.cell(0, 5, "ServOps | Windsor, Ontario | servopsca.com | +1 (519) 992-8997")
+    pdf.cell(0, 4, "ServOps | Windsor, Ontario | servopsca.com | +1 (519) 992-8997")
 
     # ── SAVE ──────────────────────────────────────────────────
     filename = f"servops-report-{uuid.uuid4().hex[:8]}.pdf"
